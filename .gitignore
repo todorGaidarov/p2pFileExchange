@@ -18,6 +18,7 @@ hs_err_pid*
 
 *.swp
 
+# eclipse meta
 .metadata
 bin/
 tmp/
@@ -27,3 +28,6 @@ local.properties
 .recommenders
 .classpath
 .project
+
+# inlliJ idea meta
+**/.idea/
