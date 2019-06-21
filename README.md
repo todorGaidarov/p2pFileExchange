@@ -7,3 +7,8 @@ The project consists of two parts:
 
 - client which can register/unregister files in the metadata server
   and this way tells that the file can be downloaded from it.
+  
+ 
+ TODO: 
+ - improve error handling by adding custom exception
+ - implement file transfer - downloading from single or many peers
