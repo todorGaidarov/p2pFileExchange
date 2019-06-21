@@ -2,7 +2,7 @@ package project.p2p.exchange.torrent.server;
 
 public interface RequestListener {
 
-	void initListener(int port, int numberOfWorkerThreads) throws Exception;
+	void initListener() throws Exception;
 
 	void startListener();
 

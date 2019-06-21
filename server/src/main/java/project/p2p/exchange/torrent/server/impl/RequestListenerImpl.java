@@ -5,9 +5,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 
+import project.p2p.exchange.torrent.server.RequestHandler;
 import project.p2p.exchange.torrent.server.RequestListener;
 import project.p2p.exchange.torrent.server.Server;
 
@@ -16,35 +16,37 @@ public class RequestListenerImpl implements RequestListener {
 	private Server torrentServer;
 
 	private ServerSocket serverSocket;
-	private Executor fixedThreadPool;
 	private int port;
 	
-	private boolean isRunning;
+	private boolean isListening;
 	
 	public RequestListenerImpl(Server torrentServer) {
 		this.torrentServer = torrentServer;
 	}
 
 	@Override
-	public void initListener(int port, int numberOfWorkerThreads) throws Exception {
-		serverSocket = new ServerSocket(port);
-		int numberThreads = numberOfWorkerThreads > 0 ? numberOfWorkerThreads : 1;
-		fixedThreadPool = Executors.newFixedThreadPool(numberThreads);
+	public void initListener() throws Exception {
+		serverSocket = new ServerSocket(torrentServer.getPort());
 	}
 
     @Override
     public void startListener() {
 		if (serverSocket != null) {
-			isRunning = true;
+			isListening = true;
 			acceptRequests();
 		}
 	}
 
+	private void handleSocketRequest(Socket socket) {
+		RequestHandler requestHandler = new RequestHandlerImpl(socket, torrentServer);
+		torrentServer.startRequestHandler(() -> requestHandler.handleRequest());
+	}
+
 	private void acceptRequests() {
 		try {
-			while (isRunning) {
+			while (isListening) {
 				Socket socket = serverSocket.accept();
-
+				handleSocketRequest(socket);
 			}
 		} catch (SocketException ex) {  // TODO improve logging
 			ex.printStackTrace();
@@ -55,12 +57,12 @@ public class RequestListenerImpl implements RequestListener {
 
 	@Override
 	public void stopListener() {
-		isRunning = false;
+		isListening = false;
 		if (serverSocket != null) {
 			try {
 				serverSocket.close();
 			} catch (IOException ex) {
-
+				ex.printStackTrace();
 			}
 		}
 	}
@@ -69,11 +71,5 @@ public class RequestListenerImpl implements RequestListener {
 	public void restartListener() {
 		// TODO Auto-generated method stub
 
-	}
-
-	public static void main(String[] args) {
-		RequestListenerImpl handler = new RequestListenerImpl(null);
-//		handler.initListener(1234, 10);
-		handler.startListener();
 	}
 }
